@@ -15,7 +15,7 @@ public class NPCReplacementsPlugin : BaseUnityPlugin
 {
     internal const string 
         PLUGIN_GUID = "alexbw145.bbplus.npcreplacementhelper",
-        PLUGIN_NAME = "Level Generator NPC Replacements.",
+        PLUGIN_NAME = "Level Generator NPC Replacements",
         PLUGIN_VERSION = "1.0.0";
     internal static new ManualLogSource Logger;
 
@@ -55,6 +55,18 @@ public class NPCReplacementsPlugin : BaseUnityPlugin
                 ];
             GeneratorManagement.Register(this, GenerationModType.Finalizer, (name, num, sceneObject) =>
             {
+                if (sceneObject.GetMeta()?.tags.Contains("main") != true) // All BCPP NPCs spawn on all Endless Mode floors.
+                {
+                    HashSet<WeightedNPC> toRemove = new();
+                    foreach (var npc in sceneObject.potentialNPCs)
+                    {
+                        if (BCPPTESTPROOF.Contains(npc.selection.Character.ToStringExtended()))
+                            toRemove.Add(npc);
+                    }
+                    foreach (var bcppchar in toRemove)
+                        sceneObject.potentialNPCs.Remove(bcppchar);
+                    return;
+                }
                 HashSet<WeightedNPC> BCPPChars = new();
                 foreach (var npc in sceneObject.potentialNPCs)
                 {
@@ -159,47 +171,69 @@ public static class NPCReplacementExtensions
         if (lg.Ec.npcsToSpawn.Contains(npc))
         {
             List<NPCReplacementData> data = new();
-            if (((CustomLevelGenerationParameters)lg.ld).GetCustomModValue(NPCReplacementsPlugin.PLUGIN_GUID, "replacementNPCs") != null)
-                data.AddRange(((List<NPCReplacementData>)((CustomLevelGenerationParameters)lg.ld).GetCustomModValue(NPCReplacementsPlugin.PLUGIN_GUID, "replacementNPCs")));
-            data.AddRange(lg.scene.previousLevels.SelectMany(x => (List<NPCReplacementData>)x.GetCurrentCustomLevelObject().GetCustomModValue(NPCReplacementsPlugin.PLUGIN_GUID, "replacementNPCs")));
+            var custommoddata = (List<NPCReplacementData>)((CustomLevelGenerationParameters)lg.ld).GetCustomModValue(NPCReplacementsPlugin.PLUGIN_GUID, "replacementNPCs");
+            if (custommoddata != null)
+                data.AddRange(custommoddata);
+            foreach (var levelObject in lg.scene.previousLevels.Select(sc => sc.GetCurrentCustomLevelObject()))
+            {
+                custommoddata = (List<NPCReplacementData>)levelObject.GetCustomModValue(NPCReplacementsPlugin.PLUGIN_GUID, "replacementNPCs");
+                if (custommoddata != null)
+                    data.AddRange(custommoddata);
+            }
             return data.Exists(d => d.npcToReplace == npc && d.npcsToUse.Count > 0);
         }
         return false;
     }
     internal static NPC ReplaceNPC(this NPC npc, LevelBuilder lg)
     {
+#if DEBUG
+        NPCReplacementsPlugin.Logger.LogInfo($"-- Replacing {npc.name}... --");
+#endif
         List<WeightedNPC> weightedList = new();
         int targetNPCWeight = -1;
         if (((CustomLevelGenerationParameters)lg.ld).GetCustomModValue(NPCReplacementsPlugin.PLUGIN_GUID, "replacementNPCs") != null)
         {
             List<NPCReplacementData> data = (List<NPCReplacementData>)((CustomLevelGenerationParameters)lg.ld).GetCustomModValue(NPCReplacementsPlugin.PLUGIN_GUID, "replacementNPCs");
-            if (data.Exists(d => d.npcToReplace == npc))
-                data.Do(d =>
-                {
-                    weightedList.AddRange(d.npcsToUse);
-                    targetNPCWeight = d.originalWeight;
-                });
+            data.DoIf(d => d.npcToReplace == npc, d =>
+            {
+                weightedList.AddRange(d.npcsToUse);
+                targetNPCWeight = d.originalWeight;
+            });
         }
         foreach (var levelObject in lg.scene.previousLevels.Select(x => x.GetCurrentCustomLevelObject()))
         {
             if (((CustomLevelGenerationParameters)lg.ld).GetCustomModValue(NPCReplacementsPlugin.PLUGIN_GUID, "replacementNPCs") != null)
             {
                 List<NPCReplacementData> data = (List<NPCReplacementData>)((CustomLevelGenerationParameters)lg.ld).GetCustomModValue(NPCReplacementsPlugin.PLUGIN_GUID, "replacementNPCs");
-                if (data.Exists(d => d.npcToReplace == npc))
-                    data.Do(d =>
-                    {
-                        weightedList.AddRange(d.npcsToUse);
-                        if (targetNPCWeight < 0)
-                            targetNPCWeight = d.originalWeight;
-                    });
+                data.DoIf(d => d.npcToReplace == npc, d =>
+                {
+                    weightedList.AddRange(d.npcsToUse);
+                    if (targetNPCWeight < 0)
+                        targetNPCWeight = d.originalWeight;
+                });
             }
         }
+#if DEBUG
         if (weightedList.Count == 0)
+        {
+            NPCReplacementsPlugin.Logger.LogInfo($"-- {npc.name} remains available! --");
+#else
+        if (weightedList.Count == 0)
+#endif
             return npc; // Do not mess up the controlled rng.
+#if DEBUG
+        }
+#endif
         if (targetNPCWeight < 0)
             targetNPCWeight = 150;
         weightedList.Insert(0, new() { selection = npc, weight = targetNPCWeight});
+#if DEBUG
+        var newnpc = WeightedSelection<NPC>.ControlledRandomSelectionList(WeightedNPC.Convert(weightedList), lg.controlledRNG);
+        NPCReplacementsPlugin.Logger.LogInfo($"-- {npc.name} became {newnpc.name}! --");
+        return newnpc;
+#else
         return WeightedSelection<NPC>.ControlledRandomSelectionList(WeightedNPC.Convert(weightedList), lg.controlledRNG);
+#endif
     }
 }
 

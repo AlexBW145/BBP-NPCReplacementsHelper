@@ -6,7 +6,7 @@ using System.Reflection.Emit;
 namespace NPCReplacementsHelper;
 
 [HarmonyPatch(typeof(LevelGenerator))]
-internal class NPCReplacerPatch
+internal static class NPCReplacerPatch
 {
     [HarmonyPatch(nameof(LevelGenerator.Generate), MethodType.Enumerator), HarmonyTranspiler]
     static IEnumerable<CodeInstruction> NPCReplacementDoings(IEnumerable<CodeInstruction> instructions) => new CodeMatcher(instructions)
@@ -18,8 +18,9 @@ internal class NPCReplacerPatch
         new(OpCodes.Ldloc_2),
         new(CodeInstruction.LoadField(typeof(LevelBuilder), nameof(LevelBuilder.seedOffset))),
         new(OpCodes.Add),
-        new(OpCodes.Add, AccessTools.Constructor(typeof(System.Random), [typeof(int)])),
+        new(OpCodes.Newobj, AccessTools.Constructor(typeof(System.Random), [typeof(int)])),
         new(CodeInstruction.StoreField(typeof(LevelBuilder), nameof(LevelBuilder.controlledRNG))))
+        .ThrowIfInvalid("Something went wrong!")
         .Advance(1)
         .InsertAndAdvance(
         new(OpCodes.Ldloc_2),
