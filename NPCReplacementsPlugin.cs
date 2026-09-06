@@ -153,7 +153,7 @@ public static class NPCReplacementExtensions
             data = dataList.Find(x => x.npcToReplace == npcToReplace);
         data.originalWeight = weight;
     }
-    internal static bool IsAvailable(this NPC npc, LevelGenerator lg)
+    internal static bool IsAvailable(this NPC npc, LevelBuilder lg)
     {
         if (lg.Ec.npcsToSpawn.Contains(npc))
         {
@@ -165,7 +165,7 @@ public static class NPCReplacementExtensions
         }
         return false;
     }
-    internal static NPC ReplaceNPC(this NPC npc, LevelGenerator lg)
+    internal static NPC ReplaceNPC(this NPC npc, LevelBuilder lg)
     {
         List<WeightedNPC> weightedList = new();
         int targetNPCWeight = -1;
