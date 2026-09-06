@@ -16,7 +16,7 @@ public class NPCReplacementsPlugin : BaseUnityPlugin
     internal const string 
         PLUGIN_GUID = "alexbw145.bbplus.npcreplacementhelper",
         PLUGIN_NAME = "Level Generator NPC Replacements",
-        PLUGIN_VERSION = "1.0.0";
+        PLUGIN_VERSION = "1.1.0";
     internal static new ManualLogSource Logger;
 
     private void Awake()
