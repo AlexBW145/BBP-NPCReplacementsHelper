@@ -36,6 +36,7 @@ public class NPCReplacementsPlugin : BaseUnityPlugin
                 }
             });
 #if DEBUG
+            // TEST TEST, MAKING SURE THE HELPER WORKS.
             string[]
             BCPPTESTPROOF = [
                 "RPSGuy",
@@ -68,7 +69,7 @@ public class NPCReplacementsPlugin : BaseUnityPlugin
                         switch (bcppstring)
                         {
                             case "RPSGuy":
-                                sceneObject.AddReplacementNPC(bcppchar, BPPTESTPROOF[0]);
+                                sceneObject.AddReplacementNPC(bcppchar, BPPTESTPROOF[0]); // This rock spawns in F1, I dunno if it can spawn again or alongside.
                                 break;
                             case "ERRORBOT":
                                 sceneObject.AddReplacementNPC(bcppchar, BPPTESTPROOF[1]);
@@ -206,6 +207,6 @@ public static class NPCReplacementExtensions
 public class NPCReplacementData(NPC npcToReplace)
 {
     public NPC npcToReplace = npcToReplace;
-    public int originalWeight = 150;
+    public int originalWeight = 150; // If this exists then what use does it even have other than to have a chance to be selected?
     public List<WeightedNPC> npcsToUse = new List<WeightedNPC>();
 }

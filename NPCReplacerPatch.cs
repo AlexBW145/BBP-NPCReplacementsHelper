@@ -31,7 +31,7 @@ internal class NPCReplacerPatch
                 if (npc.IsAvailable(lg))
                     lg.Ec.npcsToSpawn[i] = npc.ReplaceNPC(lg);
             }
-            lg.controlledRNG = new System.Random(CoreGameManager.Instance.Seed() + lg.seedOffset);
+            lg.controlledRNG = new System.Random(CoreGameManager.Instance.Seed() + lg.seedOffset); // Reset the rng or else the map may be messed up again.
         })
         )
         .InstructionEnumeration();
