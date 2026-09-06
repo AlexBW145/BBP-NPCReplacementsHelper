@@ -5,7 +5,7 @@ Now with the power of science, mods can now have NPCs have a chance to replace a
 This took at least 4 hours to make and is an overhaul of BBT's system, which is out of date for this current BBP version.
 
 # Usage
-[This helper requires the Baldi's Basics Dev API (V11.X.X.X) plugin to be used.](https://gamebanana.com/mods/383711)
+[This helper requires the Baldi's Basics Dev API (v11.X.X.X) plugin to be used.](https://gamebanana.com/mods/383711)
 
 There are extension functions that you can use with this plugin for your mod.
 ```c#
