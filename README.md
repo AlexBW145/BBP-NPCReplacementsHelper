@@ -9,6 +9,7 @@ This took at least 4 hours to make and is an overhaul of BBT's system, which is 
 
 There are extension functions that you can use with this plugin for your mod.
 ```c#
+// npcToUse parameters takes a weighted npc.
 customLevelObject.AddReplacementNPC(npcToUse, npcToReplace) // for replacing a single NPC, the standard but requires the target NPC to be replaced prefab to register.
 sceneObject.AddReplacementNPC(npcToUse, characterToReplace) // for replacing multiple NPCs with that same character enum, mainly if the NPC to be replaced prefab is different than the default one.
 ```
